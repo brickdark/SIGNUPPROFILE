@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Signup Form</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    table, th, td { border: 1px solid black; border-collapse: collapse; padding: 6px; }
+    th { background: #eee; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+
+<h2>Signup</h2>
+<form id="signupForm">
+  <input type="text" id="username" placeholder="Username"><br><br>
+  <input type="email" id="email" placeholder="Email"><br><br>
+  <input type="password" id="password" placeholder="Password"><br><br>
+  <button type="submit">Signup</button>
+</form>
+<p id="errorMsg" class="error"></p>
+
+<h2>Users</h2>
+<table id="userTable">
+  <tr><th>Username</th><th>Email</th><th>Action</th></tr>
+</table>
+
+<script>
+let users = JSON.parse(localStorage.getItem("users")) || [];
+
+// Simple password "hash"
+function hashPass(pwd) { return btoa(pwd); }
+
+// Add user
+document.getElementById("signupForm").onsubmit = function(e) {
+  e.preventDefault();
+  let u = username.value.trim(), e1 = email.value.trim(), p = password.value;
+  
+  if (!u || !e1 || !p) return errorMsg.innerText = "All fields required!";
+  if (!/\S+@\S+\.\S+/.test(e1)) return errorMsg.innerText = "Invalid email!";
+  if (p.length < 6) return errorMsg.innerText = "Password too short!";
+  errorMsg.innerText = "";
+
+  users.push({username: u, email: e1, password: hashPass(p)});
+  localStorage.setItem("users", JSON.stringify(users));
+  signupForm.reset();
+  showUsers();
+};
+
+// Show table
+function showUsers() {
+  userTable.innerHTML = "<tr><th>Username</th><th>Email</th><th>Action</th></tr>";
+  users.forEach((user, i) => {
+    userTable.innerHTML += `<tr>
+      <td>${user.username}</td>
+      <td>${user.email}</td>
+      <td><button onclick="delUser(${i})">Delete</button></td>
+    </tr>`;
+  });
+}
+
+// Delete
+function delUser(i) {
+  users.splice(i, 1);
+  localStorage.setItem("users", JSON.stringify(users));
+  showUsers();
+}
+
+showUsers();
+</script>
+
+</body>
+</html>
